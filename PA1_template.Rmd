@@ -5,10 +5,6 @@ output:
     keep_md: true
 ---
 
-```{r cache=TRUE}
-library(knitr)
-```
-
 ## Loading and preprocessing the data
 ```{r cache=TRUE}
 unzip("activity.zip")
