@@ -5,13 +5,40 @@ output:
     keep_md: true
 ---
 
+```{r cache=TRUE}
+library(knitr)
+```
 
 ## Loading and preprocessing the data
-
-
+```{r cache=TRUE}
+unzip("activity.zip")
+stepsData <- read.csv("activity.csv", header = TRUE)
+#filter out the invalid values in "steps" variable
+stepsData <- stepsData[!is.na(stepsData$steps),]
+```
 
 ## What is mean total number of steps taken per day?
+```{r cache=TRUE}
+stepsDailyAggregate <- aggregate(x = stepsData$steps, 
+                                 by = list(stepsData$date),  
+                                 FUN = function(x){sum(as.numeric(x))})
+hist(stepsDailyAggregate$x, n = 10)
 
+abline(v = mean(stepsDailyAggregate$x),
+       lty = "solid",
+       col = "blue")
+
+abline(v = median(stepsDailyAggregate$x), 
+       lty = "dashed",
+       col = "red")
+
+legend("topright", 
+     lty=c("solid","dashed"),
+     col = c("blue", "red"),
+     bty = "n",
+     legend = c(paste("Mean total daily steps =",mean(stepsDailyAggregate$x)), paste("Median total daily steps",median(stepsDailyAggregate$x))),
+     cex=0.60, pt.cex = 1)
+```
 
 
 ## What is the average daily activity pattern?
