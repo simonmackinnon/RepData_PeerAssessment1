@@ -22,6 +22,9 @@ We can find the total steps per day as a daily aggregate of the total number of 
 stepsDailyAggregate <- aggregate(x = stepsData$steps, 
                                  by = list(stepsData$date),  
                                  FUN = function(x){sum(as.numeric(x))})
+
+par (mfrow = c(1, 1))
+
 #output the aggregated daily steps data to histogram
 hist(stepsDailyAggregate$x, 
      n = 15,
@@ -199,11 +202,13 @@ The missing value mean-substitution results in a different median value for the 
 A comparison of the data summaries also indicates some differences: 
 
 ```{r results='markup'}
-summary(stepsDailyAggregate)
+#output the initial daily aggregate summary
+summary(stepsDailyAggregate$x)
 ```
 
 ```{r results='markup'}
-summary(stepsSubsDailyAggregate)
+#output the missing-value mean-substituted daily aggregate summary
+summary(stepsSubsDailyAggregate$x)
 ```
 
 ```{r fig.align='center', fig.width=10, fig.height=7}
@@ -213,6 +218,54 @@ boxplot(stepsSubsDailyAggregate$x)
 
 ```
 
-
-
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+#Get the day of the week for each value in the 'date' column
+dayType <- weekdays(as.Date(stepsDataOrigSubs$date, 
+                     format = "%Y-%m-%d"))
+
+#Make a factor variable, with levels False and True depending on whether it is a weekend or not
+dayType <- as.factor(grepl("Saturday", dayType) | grepl("Sunday", dayType))
+
+#rename the factor levels to be meaningful
+levels(dayType) <- c("weekday", "weekend")
+
+#add the factor as a column to the steps data
+stepsDataOrigSubs <- cbind(stepsDataOrigSubs, dayType)
+```
+
+```{r fig.align='center', fig.width=6, fig.height=10}
+#Get the interval aggregated average number of steps for weekends and weekdays
+dayTypeIntervalAggregate <-  aggregate(x = stepsDataOrigSubs$steps, 
+                                 by = list(stepsDataOrigSubs$dayType, stepsDataOrigSubs$interval),  
+                                 FUN = function(x){mean(as.numeric(x))})
+
+#convert the intervals into a time series
+intervalTimes2 <- strptime (sprintf("%04d", dayTypeIntervalAggregate$Group.2),
+                          format = "%H%M")
+
+dayTypeIntervalAggregate <- cbind(dayTypeIntervalAggregate, intervalTimes2)
+
+#if needed, please install the 'lattice' package
+library(lattice)
+
+# xyplots by factor level 
+# xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$Group.2|dayTypeIntervalAggregate$Group.1, 
+#     main="Average Daily Activity Pattern\nWeekends vs Weekdays",
+#     xlab="Interval",
+#     ylab="Number of steps",
+#     type = "l",
+#     layout=c(1,2))
+xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$intervalTimes2|dayTypeIntervalAggregate$Group.1, 
+    main ="Average Daily Activity Pattern\nWeekends vs Weekdays",
+    xlab ="Time",
+    ylab ="Number of steps",
+    scales=list(
+     x=list(at= seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5), 
+     labels=format(seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5),
+                   "%H:%M"))),
+    type = "l",
+    layout=c(1,2))
+
+```
