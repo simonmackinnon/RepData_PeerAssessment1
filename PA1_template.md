@@ -6,7 +6,8 @@ output:
 ---
 
 ## Loading and preprocessing the data
-```{r loadAndProcess}
+
+```r
 unzip("activity.zip")
 stepsDataOrig <- read.csv("activity.csv", header = TRUE)
 #filter out the invalid values in "steps" variable
@@ -17,7 +18,8 @@ stepsData <- stepsDataOrig[!is.na(stepsDataOrig$steps),]
 
 We can find the total steps per day as a daily aggregate of the total number of steps. Using this, we can then find the mean and median total number of steps taken per day.
 
-```{r DailyAverage, fig.align='center', fig.width=7, fig.height=5}
+
+```r
 #Get the aggregated total steps grouped by date
 stepsDailyAggregate <- aggregate(x = stepsData$steps, 
                                  by = list(stepsData$date),  
@@ -59,16 +61,21 @@ legend("topright",
                       round(median(stepsDailyAggregate$x), digits = 2),
                       "\n")),
      cex=0.60, pt.cex = 1)
+```
 
+<img src="figure/DailyAverage-1.png" title="plot of chunk DailyAverage" alt="plot of chunk DailyAverage" style="display: block; margin: auto;" />
+
+```r
 #turn clipping on again
 par(xpd=FALSE)
 ```
 
-The mean total number of steps taken per day is **`r options(scipen=999)``r round(mean(stepsDailyAggregate$x),digits=2)`** steps.
+The mean total number of steps taken per day is **10766.19** steps.
 
 
 ## What is the average daily activity pattern?
-```{r AverageDailyActivity, fig.align='center', fig.width=7, fig.height=5}
+
+```r
 #Get the interval aggregated average number of steps
 stepsIntervalAggregate <- aggregate(x = stepsData$steps, 
                                  by = list(stepsData$interval),  
@@ -116,26 +123,28 @@ legend("topright",
                 paste("Max steps =", round(maxStepsIntervalPoint$x[1], digits=2), "    \n     ")),
      cex = 0.60, 
      pt.cex = 1)
-
-
-
-#turn clipping on again
-par(xpd=FALSE)
-
 ```
 
-The maximum average number of steps taken per interval is **`r options(scipen=999)``r round(maxStepsIntervalPoint$x[1], digits=2)`** steps, at **`r strftime(maxStepsIntervalPoint$intervalTimes[1], format="%H:%M")`**.
+<img src="figure/AverageDailyActivity-1.png" title="plot of chunk AverageDailyActivity" alt="plot of chunk AverageDailyActivity" style="display: block; margin: auto;" />
+
+```r
+#turn clipping on again
+par(xpd=FALSE)
+```
+
+The maximum average number of steps taken per interval is **206.17** steps, at **08:35**.
 
 
 ## Imputing missing values
 
-The original data in 'activity.csv' has **`r sum(is.na(stepsDataOrig$steps))`** observations (i.e. intervals) that have missing values (i.e. 'NA').
+The original data in 'activity.csv' has **2304** observations (i.e. intervals) that have missing values (i.e. 'NA').
 
 So as not to affect the daily activity pattern, the mean value across all of the days for the corresponding interval should be used for *"filling in all of the missing values in the dataset"*. (N.B: Mean-Subsitution reduces data characterisitics such as variance. However, for the purposes of this assessment this method of missing-data substitution will be assumed okay)
 
 The code to do this is as follows:
 
-```{r MissingMeanSubstitution}
+
+```r
 #copy the original data
 stepsDataOrigSubs <- stepsDataOrig
 
@@ -148,10 +157,10 @@ for(i in 1:nrow(stepsDataOrigSubs))
                                     stepsDataOrigSubs$interval[i]]
   }  
 }
-
 ```
 
-```{r AverageDailyActivity2, fig.align='center', fig.width=7, fig.height=5}
+
+```r
 #Get the aggregated total steps grouped by date
 stepsSubsDailyAggregate <- aggregate(x = stepsDataOrigSubs$steps, 
                                  by = list(stepsDataOrigSubs$date),  
@@ -190,32 +199,54 @@ legend("topright",
                       round(median(stepsSubsDailyAggregate$x), digits = 2),
                       "\n")),
      cex=0.60, pt.cex = 1)
+```
 
+<img src="figure/AverageDailyActivity2-1.png" title="plot of chunk AverageDailyActivity2" alt="plot of chunk AverageDailyActivity2" style="display: block; margin: auto;" />
+
+```r
 #turn clipping on again
 par(xpd=FALSE)
 ```
 
-The mean total number of steps taken per day is **`r options(scipen=999)``r round(mean(stepsSubsDailyAggregate$x),digits=2)`** and the median total number of steps taken per day is **`r options(scipen=999)``r round(median(stepsSubsDailyAggregate$x),digits=2)`** when missing data is mean-substituted.
+The mean total number of steps taken per day is **10766.19** and the median total number of steps taken per day is **10766.19** when missing data is mean-substituted.
 
 The missing value mean-substitution results in a different median value for the updated values compared to the original missing value ommitted values.
 
 A comparison of the data summaries also indicates some differences: 
 
-```{r ImputationSummaryCompare, results='markup', fig.align='center', fig.width=10, fig.height=7}
+
+```r
 #output the initial daily aggregate summary
 summary(stepsDailyAggregate$x)
+```
 
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190
+```
+
+```r
 #output the missing-value mean-substituted daily aggregate summary
 summary(stepsSubsDailyAggregate$x)
+```
 
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10770   10770   12810   21190
+```
+
+```r
 par (mfrow = c(1, 2))
 boxplot(stepsDailyAggregate$x)
 boxplot(stepsSubsDailyAggregate$x)
 ```
 
+<img src="figure/ImputationSummaryCompare-1.png" title="plot of chunk ImputationSummaryCompare" alt="plot of chunk ImputationSummaryCompare" style="display: block; margin: auto;" />
+
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r WeekendVsWeekday, fig.align='center', fig.width=6, fig.height=10}
+
+```r
 #Get the day of the week for each value in the 'date' column
 dayType <- weekdays(as.Date(stepsDataOrigSubs$date, 
                      format = "%Y-%m-%d"))
@@ -260,5 +291,6 @@ xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$intervalTimes2|dayTyp
                    "%H:%M"))),
     type = "l",
     layout=c(1,2))
-
 ```
+
+<img src="figure/WeekendVsWeekday-1.png" title="plot of chunk WeekendVsWeekday" alt="plot of chunk WeekendVsWeekday" style="display: block; margin: auto;" />
