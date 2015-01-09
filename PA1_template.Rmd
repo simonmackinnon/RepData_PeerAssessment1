@@ -8,9 +8,9 @@ output:
 ## Loading and preprocessing the data
 ```{r}
 unzip("activity.zip")
-stepsData <- read.csv("activity.csv", header = TRUE)
+stepsDataOrig <- read.csv("activity.csv", header = TRUE)
 #filter out the invalid values in "steps" variable
-stepsData <- stepsData[!is.na(stepsData$steps),]
+stepsData <- stepsDataOrig[!is.na(stepsDataOrig$steps),]
 ```
 
 ## What is mean total number of steps taken per day?
@@ -18,19 +18,23 @@ stepsData <- stepsData[!is.na(stepsData$steps),]
 We can find the total steps per day as a daily aggregate of the total number of steps. Using this, we can then find the mean and median total number of steps taken per day.
 
 ```{r fig.align='center', fig.width=7, fig.height=5}
+#Get the aggregated total steps grouped by date
 stepsDailyAggregate <- aggregate(x = stepsData$steps, 
                                  by = list(stepsData$date),  
                                  FUN = function(x){sum(as.numeric(x))})
+#output the aggregated daily steps data to histogram
 hist(stepsDailyAggregate$x, 
      n = 15,
      main = "Histogram of Total Daily Steps",
      xlab = "Total Daily Steps")
 
+#add a vertical solid blue line to show the mean value
 abline(v = mean(stepsDailyAggregate$x),
        lty = "solid",
        lwd = 2,
        col = "blue")
 
+#add a vertical dashed red line to show the median value
 abline(v = median(stepsDailyAggregate$x), 
        lty = "dashed",
        lwd = 2,
@@ -39,6 +43,7 @@ abline(v = median(stepsDailyAggregate$x),
 #turn off clipping, as legends with long text tend to get clipped
 par(xpd=TRUE)
 
+#add a legend to indicate the line purposes
 legend("topright", 
      lty=c("solid","dashed"),
      lwd=c(2,2),
@@ -67,13 +72,14 @@ stepsIntervalAggregate <- aggregate(x = stepsData$steps,
                                  FUN = function(x){mean(as.numeric(x))})
 
 #convert the intervals into a time series
-minute_times <- strptime (sprintf("%04d", stepsIntervalAggregate$Group.1),
+intervalTimes <- strptime (sprintf("%04d", stepsIntervalAggregate$Group.1),
                           format = "%H%M")
 
 #Add the time series to the aggregated data
-stepsIntervalAggregate <- cbind(stepsIntervalAggregate, minute_times)
+stepsIntervalAggregate <- cbind(stepsIntervalAggregate, intervalTimes)
 
-plot(stepsIntervalAggregate$minute_times, 
+#plot the average steps per interval on a time series plot (line-type)
+plot(stepsIntervalAggregate$intervalTimes, 
      stepsIntervalAggregate$x,
      main = "Average Daily Activity Pattern",
      xlab = "Time",
@@ -82,24 +88,130 @@ plot(stepsIntervalAggregate$minute_times,
      lwd = c(2),
      type = "l")
 
+#add a red circle at the maximum point
+maxStepsIntervalPoint <- stepsIntervalAggregate[stepsIntervalAggregate$x == max(stepsIntervalAggregate$x),]
+
+points(maxStepsIntervalPoint$intervalTimes, 
+       maxStepsIntervalPoint$x, 
+       col = "red",
+       cex = 2,
+       pch = 1,
+       lwd = 3)
+
 #turn off clipping, as legends with long text tend to get clipped
 par(xpd=TRUE)
 
+#add a legend
 legend("topright", 
-     lty=c("solid"),
-     lwd=c(2),
-     col = c("blue"),
+     lty = c("solid", NA),
+     pch = c(NA, 1),
+     lwd = c(2, 2),
+     col = c("blue", "red"),
      bty = "n",
      legend = c(paste("Average no.    \nof steps per    \ninterval    ",                    
-                      "\n")),
-     cex=0.60, pt.cex = 1)
+                      "\n"),
+                paste("Max steps =", round(maxStepsIntervalPoint$x[1], digits=2), "    \n     ")),
+     cex = 0.60, 
+     pt.cex = 1)
+
+
 
 #turn clipping on again
 par(xpd=FALSE)
 
 ```
 
+The maximum average number of steps taken per interval is **`r options(scipen=999)``r round(maxStepsIntervalPoint$x[1], digits=2)`** steps, at **`r strftime(maxStepsIntervalPoint$intervalTimes[1], format="%H:%M")`**.
+
+
 ## Imputing missing values
+
+The original data in 'activity.csv' has **`r sum(is.na(stepsDataOrig$steps))`** observations (i.e. intervals) that have missing values (i.e. 'NA').
+
+So as not to affect the daily activity pattern, the mean value across all of the days for the corresponding interval should be used for *"filling in all of the missing values in the dataset"*. (N.B: Mean-Subsitution reduces data characterisitics such as variance. However, for the purposes of this assessment this method of missing-data substitution will be assumed okay)
+
+The code to do this is as follows:
+
+```{r}
+#copy the original data
+stepsDataOrigSubs <- stepsDataOrig
+
+#loop through the data frame, and mean-susbtitute the steps values for any missing data
+for(i in 1:nrow(stepsDataOrigSubs))
+{
+  if (is.na(stepsDataOrigSubs$steps[i]))
+  {
+    stepsDataOrigSubs$steps[i] <- stepsIntervalAggregate$x[stepsIntervalAggregate$Group.1 ==
+                                    stepsDataOrigSubs$interval[i]]
+  }  
+}
+
+```
+
+```{r fig.align='center', fig.width=7, fig.height=5}
+#Get the aggregated total steps grouped by date
+stepsSubsDailyAggregate <- aggregate(x = stepsDataOrigSubs$steps, 
+                                 by = list(stepsDataOrigSubs$date),  
+                                 FUN = function(x){sum(as.numeric(x))})
+#output the aggregated daily steps data to histogram
+hist(stepsSubsDailyAggregate$x, 
+     n = 15,
+     main = "Histogram of Total Daily Steps",
+     xlab = "Total Daily Steps")
+
+#add a vertical solid blue line to show the mean value
+abline(v = mean(stepsSubsDailyAggregate$x),
+       lty = "solid",
+       lwd = 2,
+       col = "blue")
+
+#add a vertical dashed red line to show the median value
+abline(v = median(stepsSubsDailyAggregate$x), 
+       lty = "dashed",
+       lwd = 2,
+       col = "red")
+
+#turn off clipping, as legends with long text tend to get clipped
+par(xpd=TRUE)
+
+#add a legend to indicate the line purposes
+legend("topright", 
+     lty=c("solid","dashed"),
+     lwd=c(2,2),
+     col = c("blue", "red"),
+     bty = "n",
+     legend = c(paste("Mean total daily steps =",
+                      round(mean(stepsSubsDailyAggregate$x), digits=2),
+                      "\n"), 
+                paste("Median total daily steps",
+                      round(median(stepsSubsDailyAggregate$x), digits = 2),
+                      "\n")),
+     cex=0.60, pt.cex = 1)
+
+#turn clipping on again
+par(xpd=FALSE)
+```
+
+The mean total number of steps taken per day is **`r options(scipen=999)``r round(mean(stepsSubsDailyAggregate$x),digits=2)`** and the median total number of steps taken per day is **`r options(scipen=999)``r round(median(stepsSubsDailyAggregate$x),digits=2)`** when missing data is mean-substituted.
+
+The missing value mean-substitution results in a different median value for the updated values compared to the original missing value ommitted values.
+
+A comparison of the data summaries also indicates some differences: 
+
+```{r results='markup'}
+summary(stepsDailyAggregate)
+```
+
+```{r results='markup'}
+summary(stepsSubsDailyAggregate)
+```
+
+```{r fig.align='center', fig.width=10, fig.height=7}
+par (mfrow = c(1, 2))
+boxplot(stepsDailyAggregate$x)
+boxplot(stepsSubsDailyAggregate$x)
+
+```
 
 
 
