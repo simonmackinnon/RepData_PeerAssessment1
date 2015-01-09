@@ -237,8 +237,12 @@ summary(stepsSubsDailyAggregate$x)
 
 ```r
 par (mfrow = c(1, 2))
-boxplot(stepsDailyAggregate$x)
-boxplot(stepsSubsDailyAggregate$x)
+boxplot(stepsDailyAggregate$x,
+        main="Daily Aggregated Summary",
+        ylab="Total Daily Steps")
+boxplot(stepsSubsDailyAggregate$x,
+        main="Missing-Value Mean-Substituted\nDaily Aggregated Summary",
+        ylab="Total Daily Steps")
 ```
 
 <img src="figure/ImputationSummaryCompare-1.png" title="plot of chunk ImputationSummaryCompare" alt="plot of chunk ImputationSummaryCompare" style="display: block; margin: auto;" />
@@ -285,6 +289,7 @@ xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$intervalTimes2|dayTyp
     main ="Average Daily Activity Pattern\nWeekends vs Weekdays",
     xlab ="Time",
     ylab ="Number of steps",
+    lwd = 2,
     scales=list(
      x=list(at= seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5), 
      labels=format(seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5),
