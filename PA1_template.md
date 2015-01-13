@@ -1,8 +1,8 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
 output: 
-  html_document:
-    keep_md: true
+html_document:
+keep_md: true
 ---
 
 ## Loading and preprocessing the data
@@ -50,17 +50,17 @@ par(xpd=TRUE)
 
 #add a legend to indicate the line purposes
 legend("topright", 
-     lty=c("solid","dashed"),
-     lwd=c(2,2),
-     col = c("blue", "red"),
-     bty = "n",
-     legend = c(paste("Mean total daily steps =",
-                      round(mean(stepsDailyAggregate$x), digits=2),
-                      "\n"), 
-                paste("Median total daily steps",
-                      round(median(stepsDailyAggregate$x), digits = 2),
-                      "\n")),
-     cex=0.60, pt.cex = 1)
+       lty=c("solid","dashed"),
+       lwd=c(2,2),
+       col = c("blue", "red"),
+       bty = "n",
+       legend = c(paste("Mean total daily steps =",
+                        round(mean(stepsDailyAggregate$x), digits=2),
+                        "\n"), 
+                  paste("Median total daily steps",
+                        round(median(stepsDailyAggregate$x), digits = 2),
+                        "\n")),
+       cex=0.60, pt.cex = 1)
 ```
 
 <img src="figure/DailyAverage-1.png" title="plot of chunk DailyAverage" alt="plot of chunk DailyAverage" style="display: block; margin: auto;" />
@@ -78,12 +78,12 @@ The mean total number of steps taken per day is **10766.19** steps.
 ```r
 #Get the interval aggregated average number of steps
 stepsIntervalAggregate <- aggregate(x = stepsData$steps, 
-                                 by = list(stepsData$interval),  
-                                 FUN = function(x){mean(as.numeric(x))})
+                                    by = list(stepsData$interval),  
+                                    FUN = function(x){mean(as.numeric(x))})
 
 #convert the intervals into a time series
 intervalTimes <- strptime (sprintf("%04d", stepsIntervalAggregate$Group.1),
-                          format = "%H%M")
+                           format = "%H%M")
 
 #Add the time series to the aggregated data
 stepsIntervalAggregate <- cbind(stepsIntervalAggregate, intervalTimes)
@@ -113,16 +113,16 @@ par(xpd=TRUE)
 
 #add a legend
 legend("topright", 
-     lty = c("solid", NA),
-     pch = c(NA, 1),
-     lwd = c(2, 2),
-     col = c("blue", "red"),
-     bty = "n",
-     legend = c(paste("Average no.    \nof steps per    \ninterval    ",                    
-                      "\n"),
-                paste("Max steps =", round(maxStepsIntervalPoint$x[1], digits=2), "    \n     ")),
-     cex = 0.60, 
-     pt.cex = 1)
+       lty = c("solid", NA),
+       pch = c(NA, 1),
+       lwd = c(2, 2),
+       col = c("blue", "red"),
+       bty = "n",
+       legend = c(paste("Average no.    \nof steps per    \ninterval    ",                    
+                        "\n"),
+                  paste("Max steps =", round(maxStepsIntervalPoint$x[1], digits=2), "    \n     ")),
+       cex = 0.60, 
+       pt.cex = 1)
 ```
 
 <img src="figure/AverageDailyActivity-1.png" title="plot of chunk AverageDailyActivity" alt="plot of chunk AverageDailyActivity" style="display: block; margin: auto;" />
@@ -139,9 +139,10 @@ The maximum average number of steps taken per interval is **206.17** steps, at *
 
 The original data in 'activity.csv' has **2304** observations (i.e. intervals) that have missing values (i.e. 'NA').
 
-So as not to affect the daily activity pattern, the mean value across all of the days for the corresponding interval should be used for *"filling in all of the missing values in the dataset"*. (N.B: Mean-Subsitution reduces data characterisitics such as variance. However, for the purposes of this assessment this method of missing-data substitution will be assumed okay)
+So as not to affect the daily activity pattern, the mean value across all of the days for the corresponding interval should be used for *"filling in all of the missing values in the dataset"*.  
+(N.B: Mean-Subsitution reduces data characterisitics such as variance. However, for the purposes of this assessment this method of missing-data substitution will be assumed okay)  
 
-The code to do this is as follows:
+The code to do this is as follows:  
 
 
 ```r
@@ -150,21 +151,21 @@ stepsDataOrigSubs <- stepsDataOrig
 
 #loop through the data frame, and mean-susbtitute the steps values for any missing data
 for(i in 1:nrow(stepsDataOrigSubs))
-{
-  if (is.na(stepsDataOrigSubs$steps[i]))
-  {
-    stepsDataOrigSubs$steps[i] <- stepsIntervalAggregate$x[stepsIntervalAggregate$Group.1 ==
-                                    stepsDataOrigSubs$interval[i]]
-  }  
-}
+    {
+    if (is.na(stepsDataOrigSubs$steps[i]))
+        {
+        stepsDataOrigSubs$steps[i] <- stepsIntervalAggregate$x[stepsIntervalAggregate$Group.1 ==
+                                                                   stepsDataOrigSubs$interval[i]]
+        }  
+    }
 ```
 
 
 ```r
 #Get the aggregated total steps grouped by date
 stepsSubsDailyAggregate <- aggregate(x = stepsDataOrigSubs$steps, 
-                                 by = list(stepsDataOrigSubs$date),  
-                                 FUN = function(x){sum(as.numeric(x))})
+                                     by = list(stepsDataOrigSubs$date),  
+                                     FUN = function(x){sum(as.numeric(x))})
 #output the aggregated daily steps data to histogram
 hist(stepsSubsDailyAggregate$x, 
      n = 15,
@@ -188,17 +189,17 @@ par(xpd=TRUE)
 
 #add a legend to indicate the line purposes
 legend("topright", 
-     lty=c("solid","dashed"),
-     lwd=c(2,2),
-     col = c("blue", "red"),
-     bty = "n",
-     legend = c(paste("Mean total daily steps =",
-                      round(mean(stepsSubsDailyAggregate$x), digits=2),
-                      "\n"), 
-                paste("Median total daily steps",
-                      round(median(stepsSubsDailyAggregate$x), digits = 2),
-                      "\n")),
-     cex=0.60, pt.cex = 1)
+       lty=c("solid","dashed"),
+       lwd=c(2,2),
+       col = c("blue", "red"),
+       bty = "n",
+       legend = c(paste("Mean total daily steps =",
+                        round(mean(stepsSubsDailyAggregate$x), digits=2),
+                        "\n"), 
+                  paste("Median total daily steps",
+                        round(median(stepsSubsDailyAggregate$x), digits = 2),
+                        "\n")),
+       cex=0.60, pt.cex = 1)
 ```
 
 <img src="figure/AverageDailyActivity2-1.png" title="plot of chunk AverageDailyActivity2" alt="plot of chunk AverageDailyActivity2" style="display: block; margin: auto;" />
@@ -208,11 +209,9 @@ legend("topright",
 par(xpd=FALSE)
 ```
 
-The mean total number of steps taken per day is **10766.19** and the median total number of steps taken per day is **10766.19** when missing data is mean-substituted.
-
-The missing value mean-substitution results in a different median value for the updated values compared to the original missing value ommitted values.
-
-A comparison of the data summaries also indicates some differences: 
+The mean total number of steps taken per day is **10766.19** and the median total number of steps taken per day is **10766.19** when missing data is mean-substituted.  
+The missing value mean-substitution results in a different median value for the updated values compared to the original missing value ommitted values.  
+A comparison of the data summaries also indicates some differences:  
 
 
 ```r
@@ -247,13 +246,19 @@ boxplot(stepsSubsDailyAggregate$x,
 
 <img src="figure/ImputationSummaryCompare-1.png" title="plot of chunk ImputationSummaryCompare" alt="plot of chunk ImputationSummaryCompare" style="display: block; margin: auto;" />
 
-## Are there differences in activity patterns between weekdays and weekends?
+We see more outliers for mean-substituted imputation, and variance is smaller.
+
+## Are there differences in activity patterns between weekdays and weekends?  
+
+Seperating the imputed data into observation made on weekends vs weekdays, we can observe the daily activity pattern differences.  
+To do so, we create an aggregated data frame by type of day (weekend/weekday) and then by interval, and observing the steps pattern over the course of an avereged day.
+
 
 
 ```r
 #Get the day of the week for each value in the 'date' column
 dayType <- weekdays(as.Date(stepsDataOrigSubs$date, 
-                     format = "%Y-%m-%d"))
+                            format = "%Y-%m-%d"))
 
 #Make a factor variable, with levels False and True depending on whether it is a weekend or not
 dayType <- as.factor(grepl("Saturday", dayType) | grepl("Sunday", dayType))
@@ -266,36 +271,48 @@ stepsDataOrigSubs <- cbind(stepsDataOrigSubs, dayType)
 
 #Get the interval aggregated average number of steps for weekends and weekdays
 dayTypeIntervalAggregate <-  aggregate(x = stepsDataOrigSubs$steps, 
-                                 by = list(stepsDataOrigSubs$dayType, stepsDataOrigSubs$interval),  
-                                 FUN = function(x){mean(as.numeric(x))})
+                                       by = list(stepsDataOrigSubs$dayType, stepsDataOrigSubs$interval),  
+                                       FUN = function(x){mean(as.numeric(x))})
 
 #convert the intervals into a time series
 intervalTimes2 <- strptime (sprintf("%04d", dayTypeIntervalAggregate$Group.2),
-                          format = "%H%M")
+                            format = "%H%M")
 
 dayTypeIntervalAggregate <- cbind(dayTypeIntervalAggregate, intervalTimes2)
 
 #if needed, please install the 'lattice' package
 library(lattice)
 
-# xyplots by factor level 
-# xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$Group.2|dayTypeIntervalAggregate$Group.1, 
-#     main="Average Daily Activity Pattern\nWeekends vs Weekdays",
-#     xlab="Interval",
-#     ylab="Number of steps",
-#     type = "l",
-#     layout=c(1,2))
-xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$intervalTimes2|dayTypeIntervalAggregate$Group.1, 
-    main ="Average Daily Activity Pattern\nWeekends vs Weekdays",
-    xlab ="Time",
-    ylab ="Number of steps",
-    lwd = 2,
-    scales=list(
-     x=list(at= seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5), 
-     labels=format(seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5),
-                   "%H:%M"))),
+#xyplots by factor level
+xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$Group.2|dayTypeIntervalAggregate$Group.1, 
+    main="Average Daily Activity Pattern\nWeekends vs Weekdays",
+    xlab="Interval",
+    ylab="Number of steps",
     type = "l",
     layout=c(1,2))
 ```
 
 <img src="figure/WeekendVsWeekday-1.png" title="plot of chunk WeekendVsWeekday" alt="plot of chunk WeekendVsWeekday" style="display: block; margin: auto;" />
+
+The followning graph is the same as the above graph, however, with the x-axis formatted as a time-series instead of using the 'interval' value.
+
+
+```r
+#xyplots by factor level vs time-series
+xyplot(dayTypeIntervalAggregate$x~dayTypeIntervalAggregate$intervalTimes2|dayTypeIntervalAggregate$Group.1, 
+       main ="Average Daily Activity Pattern\nWeekends vs Weekdays",
+       xlab ="Time",
+       ylab ="Number of steps",
+       lwd = 1,
+       scales=list(
+           x=list(at= seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5), 
+                  labels=format(seq(as.POSIXct(dayTypeIntervalAggregate$intervalTimes2[1]), by="6 hour", length=5),
+                                "%H:%M"))),
+       type = "l",
+       layout=c(1,2))
+```
+
+<img src="figure/WeekendVsWeekday_timeSeries-1.png" title="plot of chunk WeekendVsWeekday_timeSeries" alt="plot of chunk WeekendVsWeekday_timeSeries" style="display: block; margin: auto;" />
+
+We can see from the above graphs the difference in the patterns for weekend and weekdays. Weekdays have a higher peak in the morning, and then lower readings throughout the day.  
+Weekends tend to have smaller morning peak, followed by a number of peaks throughout the day.  
